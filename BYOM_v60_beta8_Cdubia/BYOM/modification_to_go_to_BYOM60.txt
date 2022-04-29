@@ -1,0 +1,57 @@
+Change older packages/files to work with BYOM v.6.0 and later
+===================================================================
+
+Modifications to main script:
+
+- Remove line:
+---------------------------------------------------------
+global pri zvd      % global structures for optional priors and zero-variate data
+---------------------------------------------------------
+
+- Calls to calc_likregion, calc_proflik (and possibly others as well) have changed. Check the example files if you run into errors.
+
+Modification to call_deri:
+
+- REMOVE lines:
+---------------------------------------------------------
+global glo   % allow for global parameters in structure glo
+global zvd   % global structure for zero-variate data
+---------------------------------------------------------
+
+- CHANGE function definition and the lines directly below to:
+---------------------------------------------------------
+function [Xout,TE,Xout2,zvd] = call_deri(t,par,X0v,glo)
+
+% These outputs need to be defined, even if they are not used
+Xout2    = []; % additional uni-variate output, predefine as empty
+zvd      = []; % additional zero-variate output, predefine as empty
+---------------------------------------------------------
+Note that zvd is now a part of input structure glo. See example directory of BYOM for information on how to use zero-variate data.
+
+- CHANGE the call of the ODE solver to include the input structure glo, e.g.,:
+---------------------------------------------------------
+[tout,Xout,TE,~,~] = ode45(@derivatives,t_tmp,X0,options,par,c,glo);
+---------------------------------------------------------
+
+- If an events function is used, also remove the global definition there, and add glo to the input of the events function.
+
+
+Modification to derivatives:
+
+- REMOVE line:
+---------------------------------------------------------
+global glo   % allow for global parameters in structure glo (handy for switches)
+---------------------------------------------------------
+
+- CHANGE function definition to include glo as input:
+---------------------------------------------------------
+function dX = derivatives(t,X,par,c,glo)
+---------------------------------------------------------
+
+
+And finally:
+
+- Replace the file pathdefine by the new version (see examples directories). The old version will not include all sub-directories of the engine folder. 
+
+
+
